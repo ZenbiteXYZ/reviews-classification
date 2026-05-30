@@ -1,0 +1,5 @@
+outs:
+- md5: 42a70a0cc0baee8cddef8383965303a9
+  size: 1665825
+  hash: md5
+  path: encoded_df.parquet
