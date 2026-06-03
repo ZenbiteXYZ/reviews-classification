@@ -15,7 +15,6 @@ def _():
 def _():
     import polars as pl
 
-    import numpy as np
     import fasttext
 
     return fasttext, pl
@@ -126,7 +125,24 @@ def _(mo):
 
 
 @app.cell
-def _(fasttext):
+def _():
+    import os
+    from pathlib import Path
+
+    return Path, os
+
+
+@app.cell
+def _(Path, os):
+    MODEL_DIR = Path(os.getcwd()) / "models/fasttext"
+    os.makedirs(MODEL_DIR, exist_ok=True)
+
+    model_path = MODEL_DIR / "classifier.bin"
+    return (model_path,)
+
+
+@app.cell
+def _(fasttext, model_path):
     def get_model(retrain=False):
         if retrain:
             model = fasttext.train_supervised(
@@ -138,9 +154,9 @@ def _(fasttext):
                 loss="softmax",
                 minCount=1,
             )
-            model.save_model("models/classifier.bin")
+            model.save_model(str(model_path))
         else:
-            model = fasttext.load_model("models/classifier.bin")
+            model = fasttext.load_model(str(model_path))
         return model
 
     model = get_model(retrain=False)
