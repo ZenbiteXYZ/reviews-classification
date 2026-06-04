@@ -128,8 +128,10 @@ def _(mo):
 def _():
     import os
     from pathlib import Path
+    from huggingface_hub import hf_hub_download
+    import shutil
 
-    return Path, os
+    return Path, hf_hub_download, os, shutil
 
 
 @app.cell
@@ -142,7 +144,21 @@ def _(Path, os):
 
 
 @app.cell
-def _(fasttext, model_path):
+def _(fasttext, hf_hub_download, model_path, os, shutil):
+    def load_model():
+        hf_token = os.getenv("HF_TOKEN", None)
+
+        model_cache_path = hf_hub_download(
+            repo_id="ZenbiteXYZ/reviews-classification",
+            filename="classifier.bin",
+            repo_type="model",
+            token=hf_token
+        )
+    
+        shutil.copy(model_cache_path, model_path)
+        return fasttext.load_model(str(model_path))
+
+
     def get_model(retrain=False):
         if retrain:
             model = fasttext.train_supervised(
@@ -156,7 +172,7 @@ def _(fasttext, model_path):
             )
             model.save_model(str(model_path))
         else:
-            model = fasttext.load_model(str(model_path))
+            model = load_model()
         return model
 
     model = get_model(retrain=False)
